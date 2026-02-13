@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>情人节快乐</title>
+    <style>
+        :root {
+            --primary-color: #ffffff;
+            --accent-color: #ffdae0;
+            --glow-color: rgba(255, 182, 193, 0.8);
+        }
+
+        body {
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #000;
+        }
+
+        /* 背景层级 */
+        .gradient-bg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(125deg, #1a2a6c, #b21f1f, #fdbb2d);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            z-index: 1;
+        }
+
+        .image-bg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: url('bg.jpg') center/cover no-repeat;
+            opacity: 0.35;
+            z-index: 2;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* 爱心流星容器 */
+        #heart-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 3;
+            overflow: hidden;
+        }
+
+        .player-card {
+            position: relative;
+            z-index: 10;
+            width: 85%;
+            max-width: 450px;
+            padding: 40px 20px;
+            border-radius: 35px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            text-align: center;
+            color: var(--primary-color);
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+        }
+
+        .title {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 30px;
+            letter-spacing: 2px;
+            /* 标题微光 */
+            text-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+
+        .lyric-container {
+            height: 220px;
+            overflow: hidden;
+            position: relative;
+            margin-bottom: 30px;
+            mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
+            -webkit-mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
+        }
+
+        #lyricWrapper {
+            transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .lyric-line {
+            padding: 12px 10px;
+            font-size: 16px;
+            line-height: 1.6;
+            opacity: 0.2;
+            transition: all 0.6s ease;
+        }
+
+        /* 字体发光效果 */
+        .lyric-line.active {
+            opacity: 1;
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--accent-color);
+            transform: scale(1.08);
+            text-shadow: 
+                0 0 10px var(--glow-color),
+                0 0 20px var(--glow-color);
+            animation: glowPulse 2s infinite alternate;
+        }
+
+        @keyframes glowPulse {
+            from { text-shadow: 0 0 8px var(--glow-color), 0 0 15px var(--glow-color); }
+            to { text-shadow: 0 0 15px var(--glow-color), 0 0 30px var(--glow-color); }
+        }
+
+        .controls { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+
+        button {
+            padding: 12px 40px;
+            border: none;
+            border-radius: 50px;
+            background: rgba(255,255,255,0.9);
+            color: #222;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 0 15px rgba(255,255,255,0.3);
+        }
+
+        button:hover { background: #fff; transform: translateY(-2px); box-shadow: 0 0 25px var(--glow-color); }
+
+        .progress-box { width: 100%; display: flex; align-items: center; gap: 10px; font-size: 12px; }
+        .progress-container { flex-grow: 1; background: rgba(255,255,255,0.2); height: 4px; border-radius: 2px; cursor: pointer; }
+        .progress { background: var(--primary-color); height: 100%; width: 0%; border-radius: 2px; box-shadow: 0 0 8px white; }
+
+        /* 爱心流星样式 */
+        .heart {
+            position: absolute;
+            color: var(--accent-color);
+            font-size: 20px;
+            user-select: none;
+            filter: drop-shadow(0 0 5px var(--glow-color));
+            animation: fall linear forwards;
+        }
+
+        @keyframes fall {
+            0% { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.8; }
+            100% { transform: translate(-300px, 600px) rotate(360deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="gradient-bg"></div>
+<div class="image-bg"></div>
+<div id="heart-container"></div>
+
+<div class="player-card">
+    <div class="lyric-container" id="lyricView">
+        <div id="lyricWrapper"></div>
+    </div>
+    <div class="controls">
+        <div class="progress-box">
+            <span id="currTime">00:00</span>
+            <div class="progress-container" id="progressContainer">
+                <div class="progress" id="progress"></div>
+            </div>
+            <span id="totalTime">00:00</span>
+        </div>
+        <button id="playPause">播放 🎵</button>
+    </div>
+</div>
+
+<audio id="audio" src="love.mp3"></audio>
+
+<script>
+    const lrcData = `[00:00.00]异步同频(For baby)
+[00:10.50]万千信息的洪流偶然汇聚成涟漪
+[00:15.50]赛博的星海见证某种志趣的开启
+[00:20.57]逻辑的荒原曾以孤灯构筑理想的阶梯
+[00:26.50]申城校园恰好翻开锦瑟华年的伏笔
+[00:31.44]海岸侧畔曾向咸湿的潮汐延伸
+[00:34.71]回声脉络记取某种宿命的升温
+[00:37.39]离岸经年沉溺孤寂的一行孤码
+[00:40.20]齐鲁大地逆光盛放的那个盛夏
+[00:43.32]呜~呜~呜~(到达)
+[00:53.50]南北往来终在此时同频呼吸
+[00:58.09]呜~呜~呜~(到达)
+[00:58.07]远方晨曦悄悄汇入申城街巷
+[01:02.92]此刻怀抱替代六载那些遥望
+[01:08.06]定义往后余生每一寸晨光
+[01:12.70]这是约定缔结后第一个浪漫季节
+[01:14.89]在繁华的侧影里听岁月慢慢重叠
+[01:17.00]六载寒暑每一帧都是惊鸿一瞥
+[01:19.50]我们在漫长的青春里交换唯一的诗篇
+[01:33.01]八月蝉鸣预告另一段远行与迁徙
+[01:35.90]港岛烟波遥寄拓宽认知的经纬
+[01:37.79]昔日终点见证跨越海岸距离的追寻
+[01:40.68]当下幕后稳固另一场意气风发的传奇
+[01:43.37]时代浪潮敲击现实坚硬的基石
+[01:46.04]知识殿堂采集未来朦胧的晨曦
+[01:48.54]不再隔着屏幕猜彼此灵魂的虚实
+[01:52.28]而是每一个呼吸都能触及的真实
+[01:57.28]Yeah
+[01:58.00]曾有换道踌躇时那些只有你懂的期许
+[02:01.29]也有挑灯备考时隔着屏幕一起的奋力
+[02:03.23]两千公里的晚安终于落在彼此的耳际
+[02:07.40]那些没能拥抱的瞬间都在此刻重新凝聚
+[02:12.56]Yeah
+[02:13.15]并非算法算准了谁会为谁停留
+[02:14.21]所有寻觅终在你的指尖认领了归宿
+[02:20.37]六载碎步的跋涉终在姓名里解甲
+[02:22.96]积攒了六年的眷恋止于此时的依贴
+[02:25.55]意气风发去探索那个更广阔的世界
+[02:28.86]我始终在这里守护属于你的每一处明灭
+[02:31.96]呜~呜~呜~(再次到达)
+[02:42.53]南北往来终在此时同频呼吸
+[02:45.65]呜~呜~呜~(再次到达)
+[02:47.59]远方晨曦悄悄汇入申城街巷
+[02:50.40]此刻怀抱替代六载那些遥望
+[02:55.61]定义往后余生每一寸晨光
+[03:03.08]曾有换道踌躇时那些只有你懂的期许
+[03:07.96]也有挑灯备考时隔着屏幕一起的奋力
+[03:11.26]两千公里的晚安终于落在彼此的耳际
+[03:13.09]那些没能拥抱的瞬间都在此刻重新凝聚
+[03:17.96]并非算法算准了谁会为谁停留
+[03:20.90]所有寻觅终在你的指尖认领了归宿`;
+
+    const audio = document.getElementById("audio");
+    const lyricWrapper = document.getElementById("lyricWrapper");
+    const heartContainer = document.getElementById("heart-container");
+    const playPauseBtn = document.getElementById("playPause");
+    const progress = document.getElementById("progress");
+
+    let lyrics = [];
+    let lyricLines = [];
+    let currentIndex = -1;
+
+    // 1. 初始化歌词
+    function init() {
+        lrcData.split('\n').forEach(line => {
+            const match = line.match(/\[(\d+):(\d+(?:\.\d+)?)\]/);
+            if (match) {
+                lyrics.push({
+                    time: parseInt(match[1]) * 60 + parseFloat(match[2]),
+                    text: line.replace(/\[.*\]/, '').trim()
+                });
+            }
+        });
+        lyrics.forEach(item => {
+            const div = document.createElement("div");
+            div.className = "lyric-line";
+            div.innerText = item.text;
+            lyricWrapper.appendChild(div);
+            lyricLines.push(div);
+        });
+    }
+    init();
+
+    // 2. 爱心流星逻辑
+    function createHeart() {
+        const heart = document.createElement("div");
+        heart.className = "heart";
+        heart.innerText = "❤";
+        // 随机从顶部右侧出现
+        heart.style.left = Math.random() * 120 + "%";
+        heart.style.top = "-5%";
+        // 随机大小和动画时间
+        const size = Math.random() * 15 + 10 + "px";
+        heart.style.fontSize = size;
+        const duration = Math.random() * 3 + 4 + "s";
+        heart.style.animationDuration = duration;
+        
+        heartContainer.appendChild(heart);
+        setTimeout(() => heart.remove(), 7000);
+    }
+
+    // 仅在播放时生成爱心
+    let heartTimer;
+    function toggleHearts(playing) {
+        if(playing) {
+            heartTimer = setInterval(createHeart, 400);
+        } else {
+            clearInterval(heartTimer);
+        }
+    }
+
+    // 3. 播放控制
+    playPauseBtn.addEventListener("click", () => {
+        if (audio.paused) {
+            audio.play();
+            playPauseBtn.innerText = "暂停 ⏸️";
+            toggleHearts(true);
+        } else {
+            audio.pause();
+            playPauseBtn.innerText = "播放 🎵";
+            toggleHearts(false);
+        }
+    });
+
+    // 4. 歌词滚动与高亮
+    audio.addEventListener("timeupdate", () => {
+        const cur = audio.currentTime;
+        document.getElementById("currTime").innerText = formatTime(cur);
+        if (audio.duration) {
+            document.getElementById("totalTime").innerText = formatTime(audio.duration);
+            progress.style.width = (cur / audio.duration * 100) + "%";
+        }
+
+        let nIndex = lyrics.findIndex((l, i) => cur >= l.time && (!lyrics[i+1] || cur < lyrics[i+1].time));
+        if (nIndex !== -1 && nIndex !== currentIndex) {
+            if (currentIndex !== -1) lyricLines[currentIndex].classList.remove("active");
+            currentIndex = nIndex;
+            const activeLine = lyricLines[currentIndex];
+            activeLine.classList.add("active");
+            const offset = activeLine.offsetTop - 110 + activeLine.offsetHeight / 2;
+            lyricWrapper.style.transform = `translateY(${-offset}px)`;
+        }
+    });
+
+    function formatTime(s) {
+        return Math.floor(s/60).toString().padStart(2,'0') + ":" + Math.floor(s%60).toString().padStart(2,'0');
+    }
+
+    document.getElementById("progressContainer").addEventListener("click", (e) => {
+        audio.currentTime = (e.offsetX / e.currentTarget.clientWidth) * audio.duration;
+    });
+</script>
+</body>
+</html>
