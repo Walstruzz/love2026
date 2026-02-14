@@ -48,7 +48,6 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* 爱心流星容器 */
         #heart-container {
             position: absolute;
             width: 100%;
@@ -62,8 +61,8 @@
             position: relative;
             z-index: 10;
             width: 85%;
-            max-width: 450px;
-            padding: 40px 20px;
+            max-width: 400px;
+            padding: 30px 20px;
             border-radius: 35px;
             background: rgba(255, 255, 255, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.2);
@@ -74,20 +73,58 @@
             box-shadow: 0 0 30px rgba(0,0,0,0.5);
         }
 
-        .title {
-            font-size: 22px;
-            font-weight: 600;
-            margin-bottom: 30px;
-            letter-spacing: 2px;
-            /* 标题微光 */
-            text-shadow: 0 0 10px rgba(255,255,255,0.5);
+        /* --- 精美下拉菜单样式 --- */
+        .playlist-container {
+            margin-top: 25px;
+            position: relative;
+            width: 100%;
+        }
+
+        #songSelect {
+            width: 100%;
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 25px;
+            color: white;
+            font-size: 14px;
+            appearance: none; /* 去掉原生箭头 */
+            -webkit-appearance: none;
+            cursor: pointer;
+            outline: none;
+            transition: 0.3s;
+            text-align: center;
+        }
+
+        #songSelect:focus {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: var(--accent-color);
+            box-shadow: 0 0 15px var(--glow-color);
+        }
+
+        /* 下拉菜单项的背景（注：部分手机系统浏览器会显示系统默认样式） */
+        #songSelect option {
+            background: #333;
+            color: white;
+        }
+
+        /* 自定义下拉箭头 */
+        .playlist-container::after {
+            content: '▼';
+            font-size: 10px;
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            opacity: 0.7;
         }
 
         .lyric-container {
-            height: 220px;
+            height: 180px; /* 稍微缩小高度以适配下拉菜单 */
             overflow: hidden;
             position: relative;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
             -webkit-mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
         }
@@ -104,28 +141,18 @@
             transition: all 0.6s ease;
         }
 
-        /* 字体发光效果 */
         .lyric-line.active {
             opacity: 1;
-            font-size: 20px;
+            font-size: 19px;
             font-weight: bold;
             color: var(--accent-color);
-            transform: scale(1.08);
-            text-shadow: 
-                0 0 10px var(--glow-color),
-                0 0 20px var(--glow-color);
-            animation: glowPulse 2s infinite alternate;
+            text-shadow: 0 0 10px var(--glow-color);
         }
 
-        @keyframes glowPulse {
-            from { text-shadow: 0 0 8px var(--glow-color), 0 0 15px var(--glow-color); }
-            to { text-shadow: 0 0 15px var(--glow-color), 0 0 30px var(--glow-color); }
-        }
-
-        .controls { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+        .controls { display: flex; flex-direction: column; align-items: center; gap: 15px; }
 
         button {
-            padding: 12px 40px;
+            padding: 12px 45px;
             border: none;
             border-radius: 50px;
             background: rgba(255,255,255,0.9);
@@ -134,29 +161,23 @@
             font-weight: bold;
             cursor: pointer;
             transition: 0.3s;
-            box-shadow: 0 0 15px rgba(255,255,255,0.3);
         }
 
-        button:hover { background: #fff; transform: translateY(-2px); box-shadow: 0 0 25px var(--glow-color); }
+        button:active { transform: scale(0.95); }
 
         .progress-box { width: 100%; display: flex; align-items: center; gap: 10px; font-size: 12px; }
-        .progress-container { flex-grow: 1; background: rgba(255,255,255,0.2); height: 4px; border-radius: 2px; cursor: pointer; }
+        .progress-container { flex-grow: 1; background: rgba(255,255,255,0.2); height: 4px; border-radius: 2px; }
         .progress { background: var(--primary-color); height: 100%; width: 0%; border-radius: 2px; box-shadow: 0 0 8px white; }
 
-        /* 爱心流星样式 */
         .heart {
             position: absolute;
             color: var(--accent-color);
-            font-size: 20px;
-            user-select: none;
-            filter: drop-shadow(0 0 5px var(--glow-color));
             animation: fall linear forwards;
         }
 
         @keyframes fall {
             0% { transform: translate(0, 0) rotate(0deg); opacity: 0; }
             10% { opacity: 0.8; }
-            90% { opacity: 0.8; }
             100% { transform: translate(-300px, 600px) rotate(360deg); opacity: 0; }
         }
     </style>
@@ -171,6 +192,7 @@
     <div class="lyric-container" id="lyricView">
         <div id="lyricWrapper"></div>
     </div>
+    
     <div class="controls">
         <div class="progress-box">
             <span id="currTime">00:00</span>
@@ -180,6 +202,16 @@
             <span id="totalTime">00:00</span>
         </div>
         <button id="playPause">播放 🎵</button>
+    </div>
+
+    <div class="playlist-container">
+        <select id="songSelect">
+            <option value="love.MP3" data-lrc="true">🎵 异步同频</option>
+            <option value="晴天，和下雨时候.mp3" data-lrc="false">☁️ 晴天，和下雨时候</option>
+            <option value="晴天，和下雨时候2.mp3" data-lrc="false">☁️ 晴天，和下雨时候 2</option>
+            <option value="晴天，和下雨时候3.mp3" data-lrc="false">☁️ 晴天，和下雨时候 3</option>
+            <option value="晴天，和下雨时候4.mp3" data-lrc="false">☁️ 晴天，和下雨时候 4</option>
+        </select>
     </div>
 </div>
 
@@ -243,13 +275,15 @@
     const heartContainer = document.getElementById("heart-container");
     const playPauseBtn = document.getElementById("playPause");
     const progress = document.getElementById("progress");
+    const songSelect = document.getElementById("songSelect");
 
     let lyrics = [];
     let lyricLines = [];
     let currentIndex = -1;
 
-    // 1. 初始化歌词
-    function init() {
+    // 解析歌词
+    function parseLyrics() {
+        lyrics = [];
         lrcData.split('\n').forEach(line => {
             const match = line.match(/\[(\d+):(\d+(?:\.\d+)?)\]/);
             if (match) {
@@ -259,45 +293,67 @@
                 });
             }
         });
-        lyrics.forEach(item => {
-            const div = document.createElement("div");
-            div.className = "lyric-line";
-            div.innerText = item.text;
-            lyricWrapper.appendChild(div);
-            lyricLines.push(div);
-        });
     }
-    init();
 
-    // 2. 爱心流星逻辑
+    // 渲染歌词界面
+    function renderLyrics(hasLrc) {
+        lyricWrapper.innerHTML = "";
+        lyricLines = [];
+        currentIndex = -1;
+        lyricWrapper.style.transform = `translateY(0)`;
+
+        if (hasLrc) {
+            lyrics.forEach(item => {
+                const div = document.createElement("div");
+                div.className = "lyric-line";
+                div.innerText = item.text;
+                lyricWrapper.appendChild(div);
+                lyricLines.push(div);
+            });
+        } else {
+            const div = document.createElement("div");
+            div.className = "lyric-line active";
+            div.style.marginTop = "60px";
+            div.innerText = "✨ 纯音乐欣赏 ✨";
+            lyricWrapper.appendChild(div);
+        }
+    }
+
+    parseLyrics();
+    renderLyrics(true);
+
+    // 下拉菜单切换歌曲逻辑
+    songSelect.addEventListener("change", function() {
+        const selectedOption = this.options[this.selectedIndex];
+        const src = this.value;
+        const hasLrc = selectedOption.getAttribute("data-lrc") === "true";
+
+        audio.src = src;
+        renderLyrics(hasLrc);
+        audio.play();
+        playPauseBtn.innerText = "暂停 ⏸️";
+        toggleHearts(true);
+    });
+
+    // 播放控制与爱心流星 (原有逻辑)
     function createHeart() {
         const heart = document.createElement("div");
         heart.className = "heart";
         heart.innerText = "❤";
-        // 随机从顶部右侧出现
         heart.style.left = Math.random() * 120 + "%";
         heart.style.top = "-5%";
-        // 随机大小和动画时间
-        const size = Math.random() * 15 + 10 + "px";
-        heart.style.fontSize = size;
-        const duration = Math.random() * 3 + 4 + "s";
-        heart.style.animationDuration = duration;
-        
+        heart.style.fontSize = Math.random() * 15 + 10 + "px";
+        heart.style.animationDuration = Math.random() * 3 + 4 + "s";
         heartContainer.appendChild(heart);
         setTimeout(() => heart.remove(), 7000);
     }
 
-    // 仅在播放时生成爱心
     let heartTimer;
     function toggleHearts(playing) {
-        if(playing) {
-            heartTimer = setInterval(createHeart, 400);
-        } else {
-            clearInterval(heartTimer);
-        }
+        clearInterval(heartTimer);
+        if(playing) heartTimer = setInterval(createHeart, 400);
     }
 
-    // 3. 播放控制
     playPauseBtn.addEventListener("click", () => {
         if (audio.paused) {
             audio.play();
@@ -310,7 +366,6 @@
         }
     });
 
-    // 4. 歌词滚动与高亮
     audio.addEventListener("timeupdate", () => {
         const cur = audio.currentTime;
         document.getElementById("currTime").innerText = formatTime(cur);
@@ -319,14 +374,19 @@
             progress.style.width = (cur / audio.duration * 100) + "%";
         }
 
-        let nIndex = lyrics.findIndex((l, i) => cur >= l.time && (!lyrics[i+1] || cur < lyrics[i+1].time));
-        if (nIndex !== -1 && nIndex !== currentIndex) {
-            if (currentIndex !== -1) lyricLines[currentIndex].classList.remove("active");
-            currentIndex = nIndex;
-            const activeLine = lyricLines[currentIndex];
-            activeLine.classList.add("active");
-            const offset = activeLine.offsetTop - 110 + activeLine.offsetHeight / 2;
-            lyricWrapper.style.transform = `translateY(${-offset}px)`;
+        const currentHasLrc = songSelect.options[songSelect.selectedIndex].getAttribute("data-lrc") === "true";
+        if (currentHasLrc) {
+            let nIndex = lyrics.findIndex((l, i) => cur >= l.time && (!lyrics[i+1] || cur < lyrics[i+1].time));
+            if (nIndex !== -1 && nIndex !== currentIndex) {
+                if (currentIndex !== -1 && lyricLines[currentIndex]) lyricLines[currentIndex].classList.remove("active");
+                currentIndex = nIndex;
+                const activeLine = lyricLines[currentIndex];
+                if(activeLine) {
+                    activeLine.classList.add("active");
+                    const offset = activeLine.offsetTop - 80 + activeLine.offsetHeight / 2;
+                    lyricWrapper.style.transform = `translateY(${-offset}px)`;
+                }
+            }
         }
     });
 
